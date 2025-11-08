@@ -1,0 +1,52 @@
+{
+  "name": "rental-suite",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "build": "pnpm hardhat compile && pnpm --filter frontend build",
+    "test": "pnpm hardhat test",
+    "deploy:local": "pnpm hardhat run scripts/deploy_local.ts --network ganache",
+    "deploy:sepolia": "pnpm hardhat run scripts/deploy_sepolia.ts --network sepolia",
+    "time:examples": "node scripts/timestamps.js",
+    "fund:local": "pnpm hardhat run scripts/fund_local.ts --network ganache",
+    "truffle:compile": "truffle compile --all",
+    "truffle:migrate": "truffle migrate --reset --network development",
+    "truffle:addresses": "node scripts/export_addresses_from_truffle.js",
+    "export:frontend-config": "node scripts/export_frontend_contracts_json.js",
+    "lint": "pnpm eslint .",
+    "format": "pnpm prettier --write .",
+    "frontend:dev": "pnpm --filter rental-suite-frontend dev"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.1.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/eslint-plugin": "^7.9.0",
+    "@typescript-eslint/parser": "^7.9.0",
+    "chai": "^4.3.10",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "ethers": "^6.11.1",
+    "hardhat": "^2.20.1",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "pnpm": {
+    "packageExtensions": {
+      "@nomicfoundation/hardhat-toolbox@*": {
+        "dependencies": {
+          "ts-node": "^10.9.2"
+        }
+      }
+    }
+  }
+}

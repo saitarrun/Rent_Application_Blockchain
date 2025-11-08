@@ -1,0 +1,10 @@
+.git
+**/node_modules
+frontend/.next
+frontend/out
+dist
+cache
+artifacts
+coverage
+.env
+.env.*

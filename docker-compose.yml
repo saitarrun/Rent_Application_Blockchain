@@ -1,0 +1,17 @@
+services:
+  ganache:
+    image: trufflesuite/ganache-cli
+    platform: linux/amd64
+    command: ["--host","0.0.0.0","--port","8545","-d"]
+    ports: ["8545:8545"]
+
+  app:
+    build: .
+    ports: ["3000:3000"]
+    environment:
+      - NEXT_PUBLIC_NETWORK=local
+      - NODE_ENV=development
+      - GANACHE_RPC=http://ganache:8545
+      - NEXT_PUBLIC_LOCAL_RPC=http://127.0.0.1:8545
+    depends_on:
+      - ganache
