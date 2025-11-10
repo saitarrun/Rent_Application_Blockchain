@@ -21,8 +21,9 @@ model Lease {
   startISO             String
   endISO               String
   dueDay               Int
-  monthlyRentEth       Decimal  @db.Decimal(36, 18)
-  securityDepositEth   Decimal  @db.Decimal(36, 18)
+  // SQLite does not support native Decimal precision; use Prisma Decimal without @db.Decimal
+  monthlyRentEth       Decimal
+  securityDepositEth   Decimal
   notes                String?
 
   chainId              String?
@@ -31,6 +32,7 @@ model Lease {
 
   pdfPath              String?
   status               String   @default("pending")
+  tokenId              String?
 }
 
 model Profile {

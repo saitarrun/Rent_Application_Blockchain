@@ -6,7 +6,7 @@ Overview
 - Wizard: Create Lease (Role → Property → Parties → Dates → Money [ETH] → Terms → Review)
 - PDF: Generates a clean lease PDF (ETH amounts), uploads to backend
 - Env toggle: Internal switch between Local (Ganache 1337) and Sepolia (11155111) — never shows chain IDs to users
-- Contracts: Addresses loaded from contracts.json; calls a RENT contract method (stub‑friendly)
+- Contracts: Addresses loaded from frontend/public/contracts.json; calls contracts at runtime (stub‑friendly)
 
 Quick Start
 1) Backend
@@ -34,7 +34,7 @@ Ganache/Sepolia
 Truffle networks (reference)
 - development: host 127.0.0.1, port 8545, network_id "1337", gas 10,000,000, gasPrice 1 gwei
 - sepolia: HDWalletProvider using .env (PRIVATE_KEY, SEPOLIA_RPC)
-  - After deployment, update rental-suite/contracts.json with addresses
+  - After deployment, update rental-suite/frontend/public/contracts.json with addresses
 
 Combined dev (backend + frontend)
 - From rental-suite (workspace root):
@@ -43,10 +43,19 @@ Combined dev (backend + frontend)
 
 Note: If another app already uses port 3000 (e.g., the Next.js app in ./frontend), stop it or change its port to avoid a conflict.
 
-contracts.json
+Contracts configuration
+Put addresses in frontend/public/contracts.json so the frontend can fetch them at runtime:
 {
-  "1337": { "RENT": "0xYourRentOnGanache" },
-  "11155111": { "RENT": "0xYourRentOnSepolia" }
+  "1337": {
+    "RENT": "0xYourRentOnGanache",
+    "RentalAgreementNFT": "0xYourAgreementsOnGanache",
+    "DepositStaking": "0xYourStakingOnGanache"
+  },
+  "11155111": {
+    "RENT": "0xYourRentOnSepolia",
+    "RentalAgreementNFT": "0xYourAgreementsOnSepolia",
+    "DepositStaking": "0xYourStakingOnSepolia"
+  }
 }
 
 Acceptance checkpoints

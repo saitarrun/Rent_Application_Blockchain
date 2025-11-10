@@ -87,21 +87,20 @@ contract RentChannel is ReentrancyGuard {
         address signer = address(this).recoverSigner(v, sig);
         if (signer != info.tenant) revert BadSigner();
 
-        uint256 payableAmount = v.amount > ch.deposit ? ch.deposit : v.amount;
-        if (payableAmount < ch.claimed) revert NonMonotonic();
+        require(v.amount <= ch.deposit, "voucher amount exceeds deposit");
+        if (v.amount < ch.claimed) revert NonMonotonic();
 
-        uint256 delta = payableAmount - ch.claimed;
+        uint256 delta = v.amount - ch.claimed;
         if (delta > ch.deposit - ch.claimed) revert InsufficientBalance();
 
-        ch.claimed = payableAmount;
+        ch.claimed = v.amount;
         ch.nonce = v.nonce;
 
-        (bool ok, ) = info.landlord.call{value: delta}("");
-        require(ok, "payment failed");
+        payable(info.landlord).transfer(delta);
 
         if (ch.claimed >= ch.deposit) {
             ch.open = false;
-            emit Closed(v.agreementId, payableAmount);
+            emit Closed(v.agreementId, v.amount);
         }
     }
 
@@ -109,14 +108,13 @@ contract RentChannel is ReentrancyGuard {
     function timeout(uint256 agreementId) external nonReentrant {
         Channel storage ch = channels[agreementId];
         require(ch.open, "closed");
-        require(block.timestamp >= ch.timeoutAt, "not expired");
+        require(block.timestamp >= ch.timeoutAt, "timeout not reached");
         require(msg.sender == ch.payer, "only tenant");
 
         ch.open = false;
         uint256 refund = ch.deposit - ch.claimed;
         if (refund > 0) {
-            (bool ok, ) = ch.payer.call{value: refund}("");
-            require(ok, "refund failed");
+            payable(ch.payer).transfer(refund);
         }
         emit TimeoutClosed(agreementId, refund);
     }

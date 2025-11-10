@@ -1,0 +1,34 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "landlord", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "tenant", "type": "address" }
+    ],
+    "name": "AgreementMinted",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "landlord", "type": "address" },
+      { "internalType": "address", "name": "tenant", "type": "address" },
+      { "internalType": "uint64", "name": "start", "type": "uint64" },
+      { "internalType": "uint64", "name": "end", "type": "uint64" },
+      { "internalType": "uint256", "name": "rentPerPeriod", "type": "uint256" },
+      { "internalType": "bytes32", "name": "termsHash", "type": "bytes32" }
+    ],
+    "name": "mint",
+    "outputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ],
+    "name": "burnAfterEnd",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
+

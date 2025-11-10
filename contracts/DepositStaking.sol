@@ -88,9 +88,7 @@ contract DepositStaking is Ownable, ReentrancyGuard {
     }
 
     /// @notice After end, tenant withdraws any remaining deposit.
-    function tenantWithdrawAfterEnd(uint256 tokenId, uint256 amount) external nonReentrant {
-        require(amount > 0, "zero amount");
-
+    function tenantWithdrawAfterEnd(uint256 tokenId) external nonReentrant {
         RentalAgreementNFT.Terms memory info = nft.getTerms(tokenId);
 
         // must be over
@@ -99,11 +97,11 @@ contract DepositStaking is Ownable, ReentrancyGuard {
         require(msg.sender == info.tenant, "only tenant");
 
         uint256 bal = escrow[tokenId];
-        require(amount <= bal, "insufficient escrow");
+        require(bal > 0, "zero balance");
 
-        escrow[tokenId] = bal - amount;
-        asset.safeTransfer(info.tenant, amount);
+        escrow[tokenId] = 0;
+        asset.safeTransfer(info.tenant, bal);
 
-        emit WithdrawnByTenant(tokenId, info.tenant, amount);
+        emit WithdrawnByTenant(tokenId, info.tenant, bal);
     }
 }

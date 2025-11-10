@@ -57,7 +57,7 @@ contract RentalAgreementNFT is ERC721, Ownable {
 
     /// @notice read full terms as a struct (friendlier than the public mapping getter tuple)
     function getTerms(uint256 tokenId) external view returns (Terms memory) {
-        _requireOwned(tokenId); // replaces _exists
+        _requireOwned(tokenId);
         return _terms[tokenId];
     }
 

@@ -12,6 +12,7 @@
     "dev:frontend": "npm --workspace frontend run dev"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.0",
     "concurrently": "^8.2.2"
   }
 }

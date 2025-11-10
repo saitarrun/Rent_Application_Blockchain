@@ -48,7 +48,8 @@ const patchSchema = z.object({
   txHash: z.string().optional(),
   termsHash: z.string().optional(),
   status: z.string().optional(),
-  pdfPath: z.string().optional()
+  pdfPath: z.string().optional(),
+  tokenId: z.string().optional()
 })
 
 // Routes

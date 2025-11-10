@@ -4,8 +4,10 @@
   "version": "0.1.0",
   "type": "commonjs",
   "scripts": {
+    "predev": "prisma generate && prisma db push",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
   },
+  "postinstall": "prisma generate",
   "dependencies": {
     "@prisma/client": "^5.18.0",
     "cors": "^2.8.5",

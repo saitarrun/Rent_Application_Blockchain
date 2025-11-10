@@ -10,7 +10,7 @@ import { StepTerms } from './StepTerms'
 import { StepReview } from './StepReview'
 import { createLease, updateLease, uploadLeasePdf } from '../lib/api'
 import { generateLeasePdf } from '../lib/pdf'
-import { toWei, hashTerms, getSigner, loadRentContract, getChainIdHex } from '../lib/eth'
+import { toWei, hashTerms, getSigner, loadAgreementsContract, getChainIdHex } from '../lib/eth'
 import dayjs from 'dayjs'
 
 export type WizardData = {
@@ -81,14 +81,14 @@ export function Wizard({ onCreated }: { onCreated?: () => void }) {
       let chainId: string | undefined
       let termsHash: string | undefined
       let status: string = 'pending'
+      let tokenId: string | undefined
       try {
         const signer = await getSigner()
         const chainHex = await getChainIdHex()
         chainId = chainHex === '0x539' ? '1337' : chainHex === '0xaa36a7' ? '11155111' : chainHex
 
-        const contract = await loadRentContract(chainId, signer)
+        const contract = await loadAgreementsContract(chainId, signer)
         const rentWei = toWei(w.monthlyRentEth || '0')
-        const depWei = toWei(w.securityDepositEth || '0')
         const startTs = BigInt(dayjs(w.startDate).unix())
         const endTs = BigInt(dayjs(w.endDate).unix())
 
@@ -102,12 +102,31 @@ export function Wizard({ onCreated }: { onCreated?: () => void }) {
         // Replace with your actual contract method as needed
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        if (contract && (contract as any).createAgreement) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const tx = await contract.createAgreement(w.tenantContact /* placeholder */, rentWei, startTs, endTs, termsHash)
+        if (contract && (contract as any).mint) {
+          const landlordAddr = await (await getSigner()).getAddress()
+          const tx = await (contract as any).mint(
+            landlordAddr,
+            w.tenantContact /* placeholder wallet */,
+            startTs,
+            endTs,
+            rentWei,
+            termsHash
+          )
           const receipt = await tx.wait()
           txHash = receipt?.hash || tx?.hash
+          try {
+            const logs = receipt?.logs || []
+            for (const log of logs) {
+              try {
+                const parsed = (contract as any).interface.parseLog(log)
+                if (parsed?.name === 'AgreementMinted') {
+                  const idArg = (parsed.args?.id ?? parsed.args?.tokenId)
+                  if (idArg) tokenId = idArg.toString()
+                  break
+                }
+              } catch {}
+            }
+          } catch {}
           status = 'active'
         } else {
           // Stub fallback
@@ -119,7 +138,7 @@ export function Wizard({ onCreated }: { onCreated?: () => void }) {
       }
 
       // 3) Update lease with blockchain artifacts
-      await updateLease(created.id, { txHash, chainId, termsHash, status })
+      await updateLease(created.id, { txHash, chainId, termsHash, status, tokenId })
 
       // 4) Upload generated PDF (and still accept a provided PDF if present)
       try {
@@ -148,6 +167,7 @@ export function Wizard({ onCreated }: { onCreated?: () => void }) {
           chainId,
           txHash,
           termsHash,
+          tokenId,
           pdfPath: undefined,
           status
         }
