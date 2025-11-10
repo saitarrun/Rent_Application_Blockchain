@@ -8,7 +8,7 @@ import { toast } from "./ToastBoundary";
 import { ganache, supportedChains } from "../lib/viem";
 import { shortenAddress } from "../lib/format";
 
-export function Connect() {
+export function Connect({ simple = false }: { simple?: boolean }) {
   const [mounted, setMounted] = useState(false);
   const { connector, connect, connectors, isLoading, pendingConnector } = useConnect();
   const { disconnect } = useDisconnect();
@@ -34,24 +34,28 @@ export function Connect() {
     const chainName = supportedChains.find((c) => c.id === chainId)?.name;
     return (
       <div className="flex items-center gap-3">
-        <Button
-          variant={wrongNetwork ? "destructive" : "secondary"}
-          size="sm"
-          onClick={() => switchChainAsync?.({ chainId: target })}
-        >
-          {chainName ?? "Select network"}
-        </Button>
-        {!wrongNetwork && chains && chains.length > 1 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => switchChainAsync?.({ chainId: chains.find((c) => c.id !== chainId)?.id || target })}
-          >
-            {(() => {
-              const other = chains.find((c) => c.id !== chainId);
-              return `Switch to ${other?.name ?? "other"}`;
-            })()}
-          </Button>
+        {!simple && (
+          <>
+            <Button
+              variant={wrongNetwork ? "destructive" : "secondary"}
+              size="sm"
+              onClick={() => switchChainAsync?.({ chainId: target })}
+            >
+              {chainName ?? "Select network"}
+            </Button>
+            {!wrongNetwork && chains && chains.length > 1 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => switchChainAsync?.({ chainId: chains.find((c) => c.id !== chainId)?.id || target })}
+              >
+                {(() => {
+                  const other = chains.find((c) => c.id !== chainId);
+                  return `Switch to ${other?.name ?? "other"}`;
+                })()}
+              </Button>
+            )}
+          </>
         )}
         <div className="rounded-xl bg-slate-900/70 px-3 py-2 text-xs text-slate-300">
           {shortenAddress(address)}

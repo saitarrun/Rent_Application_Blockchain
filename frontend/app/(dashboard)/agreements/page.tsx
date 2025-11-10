@@ -1,6 +1,6 @@
 "use client";
 
-import { AgreementForm } from "../../../components/forms/AgreementForm";
+import Link from "next/link";
 import { AnimatedCard } from "../../../components/AnimatedCard";
 import { useAgreements } from "../../../lib/hooks";
 import { Badge } from "../../../components/ui/badge";
@@ -8,13 +8,17 @@ import { Button } from "../../../components/ui/button";
 import { useChainId, useWriteContract } from "wagmi";
 import { contracts, RENTAL_AGREEMENT_ABI } from "../../../lib/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { formatToken, shortenAddress } from "../../../lib/format";
+import { shortenAddress } from "../../../lib/format";
 import { Skeleton } from "../../../components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { PayNow } from "../../../components/PayNow";
+import { useAccount } from "wagmi";
+import dayjs from "dayjs";
 
 export default function AgreementsPage() {
   const { data: agreements, isLoading } = useAgreements();
   const chainIdHook = useChainId();
+  const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
   const queryClient = useQueryClient();
   const chainId = chainIdHook || 1337;
@@ -36,21 +40,15 @@ export default function AgreementsPage() {
 
   return (
     <div className="grid gap-10">
-      <section className="grid gap-6 lg:grid-cols-[1.2fr,1fr]">
+      <section className="grid gap-6">
         <AnimatedCard>
-          <h2 className="text-xl font-semibold text-slate-100">Mint Agreement</h2>
-          <p className="text-sm text-slate-400">Register tenant/landlord terms and issue a soulbound agreement NFT.</p>
-          <div className="mt-6">
-            <AgreementForm />
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-100">Agreements</h2>
+              <p className="text-sm text-slate-400">Create leases with plain dates and amounts. We’ll handle the technical details.</p>
+            </div>
+            <Button asChild><Link href="/create">Create Lease</Link></Button>
           </div>
-        </AnimatedCard>
-        <AnimatedCard>
-          <h2 className="text-xl font-semibold text-slate-100">Guidelines</h2>
-          <ul className="mt-4 space-y-3 text-sm text-slate-300">
-            <li>• Agreements are non-transferable and can be burned by the landlord after expiry.</li>
-            <li>• Use unix timestamps for start and end windows.</li>
-            <li>• Rent per period is referenced when generating vouchers.</li>
-          </ul>
         </AnimatedCard>
       </section>
 
@@ -69,6 +67,9 @@ export default function AgreementsPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {agreements?.map((agreement, idx) => {
             const active = now !== null && now >= agreement.start && now <= agreement.end;
+            const isTenant = address && address.toLowerCase() === agreement.tenant.toLowerCase();
+            const confirmKey = `confirm-${chainId}-${agreement.tokenId.toString()}-${agreement.tenant}`;
+            const [confirmed, setConfirmed] = [typeof window !== 'undefined' ? localStorage.getItem(confirmKey) === '1' : true, (v: boolean) => localStorage.setItem(confirmKey, v ? '1' : '0')];
             return (
               <AnimatedCard key={`${agreement.tokenId.toString()}-${idx}`} delay={idx * 0.05}>
                 <div className="flex items-center justify-between">
@@ -80,16 +81,23 @@ export default function AgreementsPage() {
                 <div className="mt-4 space-y-2 text-xs text-slate-400">
                   <div>Landlord: {shortenAddress(agreement.landlord)}</div>
                   <div>Tenant: {shortenAddress(agreement.tenant)}</div>
-                  <div>Start: {agreement.start.toString()}</div>
-                  <div>End: {agreement.end.toString()}</div>
-                  <div>Rent/period: {formatToken(agreement.rentPerPeriod)} RENT</div>
+                  <div>Start: {dayjs(Number(agreement.start) * 1000).format('YYYY-MM-DD')}</div>
+                  <div>End: {dayjs(Number(agreement.end) * 1000).format('YYYY-MM-DD')}</div>
+                </div>
+                <div className="mt-4 grid gap-2">
+                  {active && isTenant && (
+                    <PayNow tokenId={agreement.tokenId} amountWei={agreement.rentPerPeriod} />
+                  )}
+                  {isTenant && !confirmed && (
+                    <Button variant="secondary" className="w-full" onClick={() => setConfirmed(true)}>Confirm Agreement</Button>
+                  )}
                 </div>
                 <Button
                   variant="ghost"
                   className="mt-4 w-full"
                   onClick={() => burn(agreement.tokenId)}
                 >
-                  Burn (post expiry)
+                  Close lease (post expiry)
                 </Button>
               </AnimatedCard>
             );

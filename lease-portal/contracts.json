@@ -1,0 +1,5 @@
+{
+  "1337": { "RENT": "0xYourRentOnGanache", "RentalAgreementNFT": "0xYourNFTOnGanache" },
+  "11155111": { "RENT": "0xYourRentOnSepolia", "RentalAgreementNFT": "0xYourNFTOnSepolia" }
+}
+

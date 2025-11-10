@@ -10,13 +10,9 @@ import { cn } from "../lib/format";
 
 const links = [
   { href: "/", label: "Dashboard" },
+  { href: "/create", label: "Create" },
   { href: "/agreements", label: "Agreements" },
-  { href: "/deposit", label: "Deposit" },
-  { href: "/channel", label: "Channel" },
-  { href: "/vendor", label: "Vendor" },
-  { href: "/exchange", label: "Exchange" },
-  { href: "/admin", label: "Admin" },
-  { href: "/faucet", label: "Faucet" }
+  { href: "/settings", label: "Settings" }
 ];
 
 export function Nav() {
@@ -50,7 +46,7 @@ export function Nav() {
           })}
         </nav>
         <div className="flex items-center gap-3">
-          <Connect />
+          <Connect simple />
           <ThemeToggle />
         </div>
       </div>

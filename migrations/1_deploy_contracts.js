@@ -7,33 +7,32 @@ const RentChannel = artifacts.require("RentChannel");
 
 module.exports = async function (deployer, network, accounts) {
   const owner = accounts[0];
+  console.log("owner:", owner, "accounts.length:", accounts.length);
 
-  // Deploy core tokens/contracts with required constructor args
-  await deployer.deploy(RENT, owner);
+  // gas hint to avoid out-of-gas on small block limits
+  const TX = { from: owner, gas: 6_500_000 };
+
+  await deployer.deploy(RENT, owner, TX);
   const rent = await RENT.deployed();
 
-  await deployer.deploy(RentalAgreementNFT);
+  await deployer.deploy(RentalAgreementNFT, TX);
   const nft = await RentalAgreementNFT.deployed();
 
-  await deployer.deploy(DepositStaking, rent.address, nft.address);
+  await deployer.deploy(DepositStaking, rent.address, nft.address, TX);
   const staking = await DepositStaking.deployed();
 
-  // Vendor and AMM require RENT address and initial owner
-  await deployer.deploy(Vendor, rent.address, owner);
+  await deployer.deploy(Vendor, rent.address, owner, TX);
   const vendor = await Vendor.deployed();
 
-  await deployer.deploy(MVE, rent.address, owner);
+  await deployer.deploy(MVE, rent.address, owner, TX);
   const mve = await MVE.deployed();
 
-  // Rent payment channel (requires the RentalAgreementNFT address)
-  await deployer.deploy(RentChannel, nft.address);
+  await deployer.deploy(RentChannel, nft.address, TX);
   const channel = await RentChannel.deployed();
 
-  // Grant mint permissions to Vendor and AMM
-  await rent.setMinter(vendor.address, true);
-  await rent.setMinter(mve.address, true);
+  await rent.setMinter(vendor.address, true, TX);
+  await rent.setMinter(mve.address, true, TX);
 
-  // Output addresses to console for convenience
   console.log("RENT:", rent.address);
   console.log("NFT:", nft.address);
   console.log("Staking:", staking.address);

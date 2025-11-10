@@ -1,0 +1,41 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Lease {
+  id                   String   @id @default(cuid())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  landlordName         String
+  landlordContact      String
+  tenantName           String
+  tenantContact        String
+  propertyAddress      String
+  unit                 String?
+  startISO             String
+  endISO               String
+  dueDay               Int
+  monthlyRentEth       Decimal  @db.Decimal(36, 18)
+  securityDepositEth   Decimal  @db.Decimal(36, 18)
+  notes                String?
+
+  chainId              String?
+  txHash               String?
+  termsHash            String?
+
+  pdfPath              String?
+  status               String   @default("pending")
+}
+
+model Profile {
+  id        String   @id @default("default")
+  name      String?
+  contact   String?
+  updatedAt DateTime @updatedAt
+}
